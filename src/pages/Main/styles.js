@@ -11,6 +11,12 @@ export const Form = styled.form`
     padding: 10px 15px;
     border-radius: 4px;
     font-size: 16px;
+    transition: all 300ms ease-out;
+
+    &.input-error {
+      border-color: red;
+      color: red;
+    }
   }
 `;
 

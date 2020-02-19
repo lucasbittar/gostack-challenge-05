@@ -10,7 +10,7 @@
 
 Add the following functionalities to the app we created during module #5 using `create-react-app`:
 
-- Catch form errors
+- Catch form errors [DONE]
 - Avoid adding duplicated repositories
 - Add filter for issues
 - Add pagination
