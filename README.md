@@ -8,7 +8,12 @@
 
 ### Challenge
 
-Add functionalities to the app we created during module #5 using `create-react-app`.
+Add the following functionalities to the app we created during module #5 using `create-react-app`:
+
+- Catch form errors
+- Avoid adding duplicated repositories
+- Add filter for issues
+- Add pagination
 
 ### Instructions ###
 ```
