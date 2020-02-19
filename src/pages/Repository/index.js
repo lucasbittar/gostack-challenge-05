@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import api from '../../services/api';
 
 import Container from '../../components/Container';
-import { Loading, Owner, IssueList } from './styles';
+import { Loading, Owner, IssueList, Filter } from './styles';
 
 class Repository extends Component {
   static propTypes = {
@@ -18,11 +18,40 @@ class Repository extends Component {
   state = {
     repository: {},
     issues: [],
+    per_page: 5,
     loading: true,
+    filtering: true,
+    filters: [
+      { label: 'All', value: 'all' },
+      { label: 'Open', value: 'open' },
+      { label: 'Closed', value: 'closed' },
+    ],
+    state: 'all',
   };
+
+  async loadIssues() {
+    const { match } = this.props;
+    const { state, per_page } = this.state;
+
+    const repoName = decodeURIComponent(match.params.repository);
+
+    const issues = await api.get(`/repos/${repoName}/issues`, {
+      params: {
+        state,
+        per_page,
+      },
+    });
+
+    this.setState({
+      issues: issues.data,
+      loading: false,
+      filtering: false,
+    });
+  }
 
   async componentDidMount() {
     const { match } = this.props;
+    const { state, per_page } = this.state;
 
     const repoName = decodeURIComponent(match.params.repository);
 
@@ -30,8 +59,8 @@ class Repository extends Component {
       api.get(`/repos/${repoName}`),
       api.get(`/repos/${repoName}/issues`, {
         params: {
-          state: 'open',
-          per_page: 5,
+          state,
+          per_page,
         },
       }),
     ]);
@@ -40,11 +69,31 @@ class Repository extends Component {
       repository: repository.data,
       issues: issues.data,
       loading: false,
+      filtering: false,
     });
   }
 
+  componentDidUpdate(_, prevState) {
+    const { state } = this.state;
+
+    if (prevState.state !== state) {
+      this.loadIssues();
+    }
+  }
+
+  handleSelectChange = e => {
+    this.setState({ state: e.target.value, filtering: true });
+  };
+
   render() {
-    const { repository, issues, loading } = this.state;
+    const {
+      repository,
+      issues,
+      loading,
+      state,
+      filtering,
+      filters,
+    } = this.state;
 
     if (loading) {
       return <Loading>Loading...</Loading>;
@@ -58,21 +107,35 @@ class Repository extends Component {
           <h1>{repository.name}</h1>
           <p>{repository.description}</p>
         </Owner>
+        <Filter>
+          Filter issues by state:
+          <select value={state} onChange={this.handleSelectChange}>
+            {filters.map(f => (
+              <option value={f.value}>{f.label}</option>
+            ))}
+          </select>
+        </Filter>
         <IssueList>
-          {issues.map(issue => (
-            <li key={String(issue.id)}>
-              <img src={issue.user.avatar_url} alt={issue.user.login} />
-              <div>
-                <strong>
-                  <a href={issue.html_url}>{issue.title}</a>
-                  {issue.labels.map(label => (
-                    <span key={String(label.id)}>{label.name}</span>
-                  ))}
-                </strong>
-                <p>{issue.user.login}</p>
-              </div>
-            </li>
-          ))}
+          {filtering ? (
+            <div>Filtering issues...</div>
+          ) : (
+            <>
+              {issues.map(issue => (
+                <li key={String(issue.id)}>
+                  <img src={issue.user.avatar_url} alt={issue.user.login} />
+                  <div>
+                    <strong>
+                      <a href={issue.html_url}>{issue.title}</a>
+                      {issue.labels.map(label => (
+                        <span key={String(label.id)}>{label.name}</span>
+                      ))}
+                    </strong>
+                    <p>{issue.user.login}</p>
+                  </div>
+                </li>
+              ))}
+            </>
+          )}
         </IssueList>
       </Container>
     );

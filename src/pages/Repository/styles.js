@@ -10,6 +10,21 @@ export const Loading = styled.div`
   height: 100vh;
 `;
 
+export const Filter = styled.div`
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  justify-content: flex-end;
+  border-top: 1px solid #eee;
+  margin-top: 20px;
+  padding: 20px 0;
+
+  select {
+    margin-left: 8px;
+  }
+`;
+
 export const Owner = styled.header`
   display: flex;
   flex-direction: column;
@@ -42,7 +57,6 @@ export const Owner = styled.header`
 
 export const IssueList = styled.ul`
   padding-top: 30px;
-  margin-top: 30px;
   list-style: none;
   border-top: 1px solid #eee;
 
@@ -97,5 +111,11 @@ export const IssueList = styled.ul`
         color: #999;
       }
     }
+  }
+
+  div {
+    font-weight: bold;
+    color: #222;
+    font-size: 14px;
   }
 `;
