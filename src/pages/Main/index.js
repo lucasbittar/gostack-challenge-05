@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import api from '../../services/api';
 
 import Container from '../../components/Container';
+import InputError from '../../components/InputError';
 import { Form, SubmitButton, List } from './styles';
 
 class Main extends Component {
@@ -11,7 +12,7 @@ class Main extends Component {
     newRepo: '',
     repositories: [],
     loading: false,
-    error: false,
+    error: null,
   };
 
   componentDidMount() {
@@ -31,7 +32,7 @@ class Main extends Component {
   }
 
   handleInputChange = e => {
-    this.setState({ newRepo: e.target.value, error: false });
+    this.setState({ newRepo: e.target.value, error: null });
   };
 
   handleSubmit = async e => {
@@ -42,7 +43,20 @@ class Main extends Component {
 
       const { newRepo, repositories } = this.state;
 
-      const response = await api.get(`/repos/${newRepo}`);
+      const duplicatedRepo = repositories.filter(r => r.name === newRepo);
+
+      if (duplicatedRepo.length !== 0) {
+        throw new Error('Repository already added. Try a different one.');
+      }
+
+      const response = await api.get(`/repos/${newRepo}`).catch(err => {
+        const notFound = err.response.status === 404;
+        if (notFound) {
+          throw new Error('Repository not found. Maybe a typo?');
+        } else {
+          throw new Error(err.response.data.message);
+        }
+      });
 
       const data = {
         name: response.data.full_name,
@@ -52,11 +66,14 @@ class Main extends Component {
         repositories: [...repositories, data],
         newRepo: '',
         loading: false,
-        error: false,
+        error: null,
       });
     } catch (err) {
-      // Stop loading and update error to true
-      this.setState({ loading: false, error: true });
+      // Stop loading and update error message
+      this.setState({
+        loading: false,
+        error: err.message,
+      });
     }
   };
 
@@ -85,6 +102,7 @@ class Main extends Component {
             )}
           </SubmitButton>
         </Form>
+        {error && <InputError>{error}</InputError>}
 
         <List>
           {repositories.map(repository => (

@@ -14,8 +14,8 @@ export const Form = styled.form`
     transition: all 300ms ease-out;
 
     &.input-error {
-      border-color: red;
-      color: red;
+      border-color: #ff4136;
+      color: #ff4136;
     }
   }
 `;
