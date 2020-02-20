@@ -13,7 +13,7 @@ Add the following functionalities to the app we created during module #5 using `
 - Catch form errors [DONE]
 - Avoid adding duplicated repositories [DONE]
 - Add filter for issues [DONE]
-- Add pagination
+- Add pagination [DONE]
 
 ### Instructions ###
 ```

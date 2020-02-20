@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import api from '../../services/api';
 
 import Container from '../../components/Container';
+import Pagination from '../../components/Pagination';
 import { Loading, Owner, IssueList, Filter } from './styles';
 
 class Repository extends Component {
@@ -19,6 +21,7 @@ class Repository extends Component {
     repository: {},
     issues: [],
     per_page: 5,
+    page: 1,
     loading: true,
     filtering: true,
     filters: [
@@ -31,7 +34,7 @@ class Repository extends Component {
 
   async loadIssues() {
     const { match } = this.props;
-    const { state, per_page } = this.state;
+    const { state, per_page, page } = this.state;
 
     const repoName = decodeURIComponent(match.params.repository);
 
@@ -39,6 +42,7 @@ class Repository extends Component {
       params: {
         state,
         per_page,
+        page,
       },
     });
 
@@ -85,6 +89,14 @@ class Repository extends Component {
     this.setState({ state: e.target.value, filtering: true });
   };
 
+  handlePagination = async action => {
+    const { page } = this.state;
+    await this.setState({
+      page: action === 'prev' ? page - 1 : page + 1,
+    });
+    this.loadIssues();
+  };
+
   render() {
     const {
       repository,
@@ -93,6 +105,7 @@ class Repository extends Component {
       state,
       filtering,
       filters,
+      page,
     } = this.state;
 
     if (loading) {
@@ -111,7 +124,9 @@ class Repository extends Component {
           Filter issues by state:
           <select value={state} onChange={this.handleSelectChange}>
             {filters.map(f => (
-              <option value={f.value}>{f.label}</option>
+              <option key={f.value} value={f.value}>
+                {f.label}
+              </option>
             ))}
           </select>
         </Filter>
@@ -137,6 +152,17 @@ class Repository extends Component {
             </>
           )}
         </IssueList>
+        <Pagination>
+          <button
+            disabled={page === 1}
+            onClick={() => this.handlePagination('prev')}
+          >
+            <FaChevronLeft size={14} color="#fff" />
+          </button>
+          <button onClick={() => this.handlePagination('next')}>
+            <FaChevronRight size={14} color="#fff" />
+          </button>
+        </Pagination>
       </Container>
     );
   }
